@@ -90,3 +90,22 @@ function viewDepartments() {
     });
 }
 
+//View all roles
+function viewRoles() {
+    connection.query("SELECT * FROM role", (err, data) => {
+        if (err) throw err;
+        console.log("Displaying Roles:");
+        console.table(data);
+        start();
+    });
+}
+
+//View all employees
+function viewEmployees() {
+    connection.query("SELECT * FROM employee", (err, data) => {
+        if (err) throw err;
+        console.log("Displaying Employees:");
+        console.table(data);
+        start();
+    });
+}
