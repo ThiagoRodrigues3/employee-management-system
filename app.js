@@ -277,3 +277,74 @@ function addEmployee() {
         });
     });
 }
+
+//Update employee role
+function update() {
+    connection.query("SELECT * FROM employee, role", (err, results) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                name: "employee",
+                type: "rawlist",
+                choices: () => {
+                    let choiceArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].last_name);
+                    }
+                    //remove duplicates
+                    let cleanChoiceArray = [...new Set(choiceArray)];
+                    return cleanChoiceArray;
+                },
+                message: "Which employee would you like to update?"
+            },
+            {
+                name: "role",
+                type: "rawlist",
+                choices: () => {
+                    let choiceArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].title);
+                    }
+                    //remove duplicates
+                    let cleanChoiceArray = [...new Set(choiceArray)];
+                    return cleanChoiceArray;
+                },
+                message: "What is the employee's new role?"
+            }
+        ]).then(answer => {
+            let chosenEe;
+            let chosenRole;
+
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].last_name === answer.employee) {
+                    chosenEe = results[i];
+                }
+            }
+
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].title === answer.role) {
+                    chosenRole = results[i];
+                }
+            }
+
+            connection.query(
+                "UPDATE employee SET ? WHERE ?",
+                [
+                    {
+                        role_id: chosenRole,
+                    },
+                    {
+                        last_name: chosenEe,
+                    }
+                ],
+                (err) => {
+                    if (err) throw err;
+                    console.log(`Role has been updated!`);
+                    start();
+                }
+            )
+        })
+    })
+}
+
