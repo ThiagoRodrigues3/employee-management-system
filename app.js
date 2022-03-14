@@ -79,3 +79,14 @@ function start() {
 
 // Functions that are called above
 
+
+// View all departments
+function viewDepartments() {
+    connection.query("SELECT * FROM department", (err, data) => {
+        if (err) throw err;
+        console.log("Displaying Departments:");
+        console.table(data);
+        start();
+    });
+}
+
