@@ -139,3 +139,141 @@ function addDepartment() {
         );
     });
 }
+
+//Add a role
+function addRole() {
+    const sql = "SELECT * FROM department";
+    connection.query(sql, (err, results) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                name: "title",
+                type: "input",
+                message: "What is the New Role?",
+                validate: (value) => {
+                    if (value) {
+                        return true;
+                    } else {
+                        console.log("Please Enter Role Title.");
+                    }
+                }
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "What is this Role's Salary?",
+                validate: (value) => {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    console.log("Please Enter Salary");
+                }
+            },
+            {
+                name: "department",
+                type: "rawlist",
+                choices: () => {
+                    let choiceArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].name);
+                    }
+                    return choiceArray;
+                },
+                message: "What department does this Role Belong To?",
+            }
+        ]).then(answer => {
+            let chosenDept;
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].name === answer.department) {
+                    chosenDept = results[i];
+                }
+            }
+
+            connection.query(
+                "INSERT INTO role SET ?",
+                {
+                    title: answer.title,
+                    salary: answer.salary,
+                    department_id: chosenDept.id
+                },
+                (err) => {
+                    if (err) throw err;
+                    console.log(`${answer.title} has been added!`);
+                    start();
+                }
+            )
+        });
+    });
+}
+
+//Add an employee
+function addEmployee() {
+    const sql = "SELECT * FROM employee, role";
+    connection.query(sql, (err, results) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                name: "firstName",
+                type: "input",
+                message: "Employee's first name?",
+                validate: (value) => {
+                    if (value) {
+                        return true;
+                    } else {
+                        console.log("Please enter First Name.");
+                    }
+                }
+            },
+            {
+                name: "lastName",
+                type: "input",
+                message: "Employee's Last Name?",
+                validate: (value) => {
+                    if (value) {
+                        return true;
+                    } else {
+                        console.log("Please enter Last Name.");
+                    }
+                }
+            },
+            {
+                name: "role",
+                type: "rawlist",
+                choices: () => {
+                    let choiceArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        choiceArray.push(results[i].title);
+                    }
+                    //remove duplicates
+                    let cleanChoiceArray = [...new Set(choiceArray)];
+                    return cleanChoiceArray;
+                },
+                message: "What is the Employee's Role?"
+            }
+        ]).then(answer => {
+            let chosenRole;
+
+            for (let i = 0; i < results.length; i++) {
+                if (results[i].title === answer.role) {
+                    chosenRole = results[i];
+                }
+            }
+
+            connection.query(
+                "INSERT INTO employee SET ?",
+                {
+                    first_name: answer.firstName,
+                    last_name: answer.lastName,
+                    role_id: chosenRole.id,
+                },
+                (err) => {
+                    if (err) throw err;
+                    console.log(`${answer.firstName} ${answer.lastName} has been added as a/an ${answer.role}`);
+                    start();
+                }
+            )
+        });
+    });
+}
